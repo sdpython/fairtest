@@ -46,8 +46,7 @@ def g_test(data, correction=False):
     if data.sum() == 0:
         return 0, 1.0, 1, None
 
-    return stats.chi2_contingency(data, correction=correction,
-                                  lambda_="log-likelihood")
+    return stats.chi2_contingency(data, correction=correction, lambda_="log-likelihood")
 
 
 def z_test(stat, sigma):
@@ -161,10 +160,7 @@ def permutation_test_ct(data, num_samples=100000):
     if data.shape[0] < 2 or data.shape[1] < 2:
         return 1
 
-    raise NotImplementedError("Replaces with Python")
-    # ro.globalenv['ct'] = data
-    # pval = ro.r('chisq.test(ct, simulate.p.value = TRUE, B = {})$p.value'.
-    #             format(num_samples))[0]
+    ch, pval = stats.chisquare(data, axis=None)
     return max(pval, 1.0/num_samples)
 
 

@@ -18,14 +18,6 @@ import logging
 import random
 import warnings
 
-try:
-    import rpy2.robjects as ro
-    from rpy2.robjects import numpy2ri
-
-    numpy2ri.activate()
-except (ImportError, RuntimeError):
-    warnings.warn("rpy2 not installed. Some parts may be missing.")
-
 
 class Investigation(object):
     """
@@ -289,7 +281,7 @@ def test(investigations, prune_insignificant=True, exact=True, correct=True,
 
     test_data = holdout.get_test_set()
 
-    try:
+    if 1: #try:
         for (idx, inv) in enumerate(investigations):
             inv.test_params = {'prune_insignificant': prune_insignificant,
                                'exact': exact,
@@ -306,16 +298,15 @@ def test(investigations, prune_insignificant=True, exact=True, correct=True,
             # prepare testing data for all hypotheses
             for sens in inv.sens_features:
                 new_metric = new_metrics[idx].get(sens, None)
-                if isinstance(new_metric, basestring):
+                if isinstance(new_metric, str):
                     new_metric = metric_from_string(new_metric)
 
                 tree = inv.trained_trees[sens]
                 logging.info('Parsing tree for sensitive feature %s...' % sens)
-                inv.contexts[sens] \
-                    = tree_parser.find_contexts(tree, data, inv.feature_info,
-                                                sens, inv.expl, inv.output,
-                                                prune_insignificant,
-                                                new_metric=new_metric)
+                inv.contexts[sens] = tree_parser.find_contexts(tree, data, inv.feature_info,
+                                                               sens, inv.expl, inv.output,
+                                                               prune_insignificant,
+                                                               new_metric=new_metric)
                 logging.info('Parsed tree for sensitive feature %s' % sens)
 
         # compute p-values and confidence intervals with FWER correction
@@ -324,7 +315,7 @@ def test(investigations, prune_insignificant=True, exact=True, correct=True,
 
         multitest.compute_all_stats(investigations, exact,
                                     holdout.test_set_conf, correct)
-    except Exception:
+    else : #except Exception as e:
         holdout.return_unused_data(test_data)
 
 

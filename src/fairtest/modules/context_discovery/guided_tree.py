@@ -14,6 +14,7 @@ import traceback
 import sys
 import random
 import math
+from functools import reduce
 
 
 def find_thresholds(data, features, feature_info, num_bins):
@@ -776,7 +777,7 @@ def test_cont_feature(node_data, feature, split_params, score_params):
             logging.debug('testing threshold %s', thresholds[keys[i]])
             logging.debug('split score: %s', split_score)
 
-            if split_score > max_score:
+            if max_score is None or split_score > max_score:
                 max_score = split_score
                 best_threshold = thresholds[keys[i]]
                 best_metrics = dict(zip(['left', 'right'], metrics))

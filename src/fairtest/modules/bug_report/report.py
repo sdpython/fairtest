@@ -229,7 +229,7 @@ def bug_report(contexts, stats, sens, expl, output, output_stream,
 
     metric = contexts[0].metric
     metric_type = metric.dataType
-    contexts_stats = zip(contexts, stats)
+    contexts_stats = list(zip(contexts, stats))
     namer = Namer(sens, expl, output, encoders)
 
     # print global stats (root of tree)
@@ -298,7 +298,7 @@ def print_context(path, namer):
     """
     new_path = {
         key: val if isinstance(val, Bound) else namer.get_feature_val(key, val)
-        for (key, val) in path.iteritems()}
+        for (key, val) in path.items()}
 
     return new_path
 
@@ -332,7 +332,7 @@ def print_context_ct(context, context_stats, metric_name, namer, output_stream):
         ct.index.name = out
         ct.columns = namer.get_sens_feature_vals(len(ct.columns))
         ct.columns.name = namer.sens
-        output_stream.write(pretty_ct(ct))
+        output_stream.write(str(pretty_ct(ct)))
         output_stream.write('')
     else:
         expl_values = namer.get_expl_feature_vals(len(context_stats))
@@ -352,7 +352,7 @@ def print_context_ct(context, context_stats, metric_name, namer, output_stream):
                 ct.index.name = out
                 ct.columns = namer.get_sens_feature_vals(len(ct.columns))
                 ct.columns.name = namer.sens
-                output_stream.write(pretty_ct(ct))
+                output_stream.write(str(pretty_ct(ct)))
                 output_stream.write('')
 
         context_stats = context_stats.loc[0]
@@ -626,7 +626,7 @@ def print_context_reg(context, context_stats, namer, output_stream):
         ct.columns = namer.get_sens_feature_vals(2)
         ct.columns.name = sens
 
-        output_stream.write(pretty_ct(ct))
+        output_stream.write(str(pretty_ct(ct)))
         output_stream.write('')
 
 
@@ -757,8 +757,8 @@ def print_report_info(dataset, train_size, test_size, sensitive, contextual,
         stream to output the data to
     """
     output_stream.write('='*80)
-    output_stream.write('Report Creation time:',\
-        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    output_stream.write('Report Creation time: {}'.format(
+        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     output_stream.write('')
     output_stream.write('Dataset: {}'.format(dataset))
     output_stream.write('Train Size: {}'.format(train_size))

@@ -64,7 +64,7 @@ def compute_investigation_stats(inv, exact=True, conf=0.95, correct=True):
 
     # statistics for all investigations
     all_stats = {sens: compute_stats(ctxts, exact, adj_conf, inv.random_state)
-                 for (sens, ctxts) in sorted(inv.contexts.iteritems())}
+                 for (sens, ctxts) in sorted(inv.contexts.items())}
 
     # flattened array of all p-values
     all_pvals = [max(stat[-1], 1e-180)
@@ -81,7 +81,7 @@ def compute_investigation_stats(inv, exact=True, conf=0.95, correct=True):
     idx = 0
 
     # iterate over all protected features for the investigation
-    for (sens, sens_contexts) in inv.contexts.iteritems():
+    for (sens, sens_contexts) in inv.contexts.items():
         sens_stats = all_stats[sens]['stats']
         # iterate over all contexts for a protected feature
         for i in range(len(sens_stats)):
@@ -90,7 +90,7 @@ def compute_investigation_stats(inv, exact=True, conf=0.95, correct=True):
                 np.append(old_stats[0:-1], pvals_corr[idx])
             idx += 1
 
-    for (sens, sens_contexts) in inv.contexts.iteritems():
+    for (sens, sens_contexts) in inv.contexts.items():
         metric = sens_contexts[0].metric
         # For regression, re-form the dataframes for each context
         if isinstance(metric.stats, pd.DataFrame):
@@ -102,7 +102,7 @@ def compute_investigation_stats(inv, exact=True, conf=0.95, correct=True):
                      np.array_split(res, len(res)/len(metric.stats))}
 
     all_stats = {sens: sens_stats['stats']
-                 for (sens, sens_stats) in all_stats.iteritems()}
+                 for (sens, sens_stats) in all_stats.items()}
 
     return all_stats
 
@@ -157,9 +157,9 @@ def _wrapper(context, conf, exact, seed):
     """
 
     # seed the PRNGs used to compute statistics
-    import rpy2.robjects as ro
-    logging.info('Computing stats for context %d' % context.num)
-    ro.r('set.seed({})'.format(seed))
+    # import rpy2.robjects as ro
+    # logging.info('Computing stats for context %d' % context.num)
+    # ro.r('set.seed({})'.format(seed))
     np.random.seed(seed)
     return context.metric.compute(context.data, conf, exact=exact).stats
 
@@ -194,17 +194,13 @@ def compute_stats(contexts, exact, conf, seed):
 
     """
     P = multiprocessing.Pool(multiprocessing.cpu_count())
-    results = P.map_async(
-        _wrapper,
-        zip(contexts, [conf]*len(contexts), [exact]*len(contexts),
-            [seed]*len(contexts))
-    )
+    results = P.map_async(_wrapper, zip(contexts, [conf]*len(contexts), [exact]*len(contexts), [seed]*len(contexts)))
     stats = results.get()
     P.close()
     P.join()
     """
 
-    stats = [_wrapper((context, conf, exact, seed)) for context in contexts]
+    stats = [_wrapper(context, conf, exact, seed) for context in contexts]
 
     #
     # When calling 'map_async', the Context object is pickled
