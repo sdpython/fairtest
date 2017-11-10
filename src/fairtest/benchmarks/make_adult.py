@@ -4,9 +4,8 @@ Run FairTest Testing Investigation on Adult Dataset
 Usage: ./make_adult.py fairtest/data/adult/adult.csv results/adult
 """
 
-import fairtest.utils.prepare_data as prepare
-from fairtest import Testing, train, test, report, DataSource
-
+from .utils import prepare_data as prepare
+from . import Testing, train, test, report, DataSource
 from time import time
 import sys
 

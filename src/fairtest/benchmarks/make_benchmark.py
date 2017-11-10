@@ -5,8 +5,8 @@ Usage: ./make_benchmark.py fairtest/data/benchmark/benchmark.csv \
        results/benchmark
 """
 
-import fairtest.utils.prepare_data as prepare
-from fairtest import Testing, train, test, report, DataSource
+from .utils import prepare_data as prepare
+from . import Testing, train, test, report, DataSource
 
 from time import time
 import sys

@@ -2,13 +2,12 @@
 An abstract FairTest Investigation.
 """
 
-import fairtest.modules.context_discovery.tree_parser as tree_parser
-import fairtest.modules.context_discovery.guided_tree as guided_tree
-import fairtest.modules.statistics.multiple_testing as multitest
-from fairtest.modules.metrics import *
-import fairtest.modules.bug_report.report as report_module
-import fairtest.modules.bug_report.filter_rank as filter_rank
-from fairtest.holdout import DataSource
+from .modules.context_discovery import tree_parser as tree_parser
+from .modules.context_discovery import guided_tree as guided_tree
+from .modules.statistics import multiple_testing as multitest
+from .modules.bug_report import report as report_module
+from .modules.bug_report import filter_rank as filter_rank
+from .holdout import DataSource
 
 import numpy as np
 from copy import copy
@@ -17,11 +16,15 @@ import sys
 import abc
 import logging
 import random
+import warnings
 
-import rpy2.robjects as ro
-from rpy2.robjects import numpy2ri
+try:
+    import rpy2.robjects as ro
+    from rpy2.robjects import numpy2ri
 
-numpy2ri.activate()
+    numpy2ri.activate()
+except (ImportError, RuntimeError):
+    warnings.warn("rpy2 not installed. Some parts may be missing.")
 
 
 class Investigation(object):
@@ -90,7 +93,7 @@ class Investigation(object):
             self.random_state = random_state
         else:
             self.random_state = 0
-        ro.r('set.seed({})'.format(self.random_state))
+        # ro.r('set.seed({})'.format(self.random_state))
         random.seed(self.random_state)
 
         self.train_set = data_source.train_data.copy()
@@ -413,11 +416,10 @@ def report(investigations, dataname, output_dir=None, filter_conf=0.95,
 
         # print all the bug reports
         for sens in inv.sens_features:
-            print >> output_stream, 'Report of associations of O={} on Si = ' \
-                                    '{}:'.format(inv.output.short_names, sens)
-            print >> output_stream, \
-                'Association metric: {}'.format(inv.metrics[sens])
-            print >> output_stream
+            output_stream.write('Report of associations of O={} on Si = ' \
+                                    '{}:'.format(inv.output.short_names, sens))
+            output_stream.write('Association metric: {}'.format(inv.metrics[sens]))
+            output_stream.write('')
             stats = inv.stats[sens]
             contexts = inv.contexts[sens]
 

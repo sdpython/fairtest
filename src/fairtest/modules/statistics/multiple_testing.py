@@ -6,7 +6,6 @@ import numpy as np
 from statsmodels.sandbox.stats.multicomp import multipletests
 import logging
 import multiprocessing
-import rpy2.robjects as ro
 
 
 def compute_all_stats(investigations, exact=True, conf=0.95, correct=True):
@@ -133,7 +132,7 @@ def num_hypotheses(inv):
     return tot
 
 
-def _wrapper((context, conf, exact, seed)):
+def _wrapper(context, conf, exact, seed):
     """
     Helper, wrapper used for map_async callback
 
@@ -158,6 +157,7 @@ def _wrapper((context, conf, exact, seed)):
     """
 
     # seed the PRNGs used to compute statistics
+    import rpy2.robjects as ro
     logging.info('Computing stats for context %d' % context.num)
     ro.r('set.seed({})'.format(seed))
     np.random.seed(seed)

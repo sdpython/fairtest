@@ -73,7 +73,7 @@ def merge(file1, file2, file3):
         for line in f1:
             line = line.strip()
             zipcode = line.rsplit(",")[-1]
-            print >> f2, "%s,%s" % (line, demographics[zipcode])
+            f2.write("%s,%s" % (line, demographics[zipcode]))
 
     # rm intermediate temp file
     os.remove(file2)

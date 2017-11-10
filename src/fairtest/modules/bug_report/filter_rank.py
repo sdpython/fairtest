@@ -1,7 +1,7 @@
 """
 Filter and Rank Association Bugs.
 """
-from fairtest.modules.metrics import Metric
+from ..metrics import Metric
 import pandas as pd
 import numpy as np
 import logging
@@ -84,7 +84,7 @@ def filter_rank_bugs(context_stats, node_filter=FILTER_BETTER_THAN_ANCESTORS,
                          c.metric.abs_effect() > 0]
 
     # sort by effect size
-    filtered_bugs.sort(key=lambda (c, stats): c.metric.abs_effect(),
+    filtered_bugs.sort(key=lambda c, stats: c.metric.abs_effect(),
                        reverse=True)
 
     logging.info('%d sub-contexts printed' % len(filtered_bugs))

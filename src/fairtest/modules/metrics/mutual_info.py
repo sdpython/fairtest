@@ -42,7 +42,7 @@ class NMI(Metric):
             raise ValueError('NMI metric only usable with categorical features')
 
     approx_LIMIT_P = 1000
-    approx_LIMIT_CI = sys.maxint
+    approx_LIMIT_CI = 2**30
 
     def abs_effect(self):
         return self.stats[0]

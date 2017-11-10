@@ -196,8 +196,8 @@ if __name__ == "__main__":
         user_movies_weights = [movie_avgs[x[1]][1] for x in recommendations]
         user_weighted_avg = np.average(user_movies_avgs, weights=user_movies_weights)
         avg_score = np.mean([x[2] for x in recommendations])
-        print '{}\t{}\t{}\t{}\t{}'.format(user, user_weighted_avg, user_movies_avgs_seen, rmse, labels)
-        print >> f_out, '{}\t{}\t{}\t{}\t{}'.format(user, user_weighted_avg, user_movies_avgs_seen, rmse, labels)
+        print('{}\t{}\t{}\t{}\t{}'.format(user, user_weighted_avg, user_movies_avgs_seen, rmse, labels))
+        f_out.write('{}\t{}\t{}\t{}\t{}'.format(user, user_weighted_avg, user_movies_avgs_seen, rmse, labels))
     # clean up
     sc.stop()
     

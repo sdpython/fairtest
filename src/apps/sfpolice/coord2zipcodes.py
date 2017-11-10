@@ -67,9 +67,7 @@ with open("coord2zipcode.csv", "w") as output:
         try:
             result0 = resp['results'][0]
             formatted_address = result0['formatted_address']
-    #             print >> output, "\"%s\",\"%s\"" % (addr, formatted_address)
-            print >> output, "\"%s\",\"%s\",\"%s\",\"%s\"" % (addr, formatted_address, x, y)
+            output.write("\"%s\",\"%s\",\"%s\",\"%s\"" % (addr, formatted_address, x, y))
         except Exception, error:
-            print "error on address:", addr
+            warnings.warn("error on address: {0}".format(addr))
         output.flush()
-    #    time.sleep(0.02)

@@ -1,9 +1,8 @@
 """
 Testing Investigations
 """
-
-from fairtest.investigation import Investigation, metric_from_string
-from fairtest.modules.metrics import NMI, CondDIFF, CORR, CondNMI, CondCORR
+from .investigation import Investigation, metric_from_string
+from .modules.metrics import NMI, CondDIFF, CORR, CondNMI, CondCORR
 import logging
 
 

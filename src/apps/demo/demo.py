@@ -1,8 +1,8 @@
 """
 Simple examples
 """
-from fairtest.bugreport import api2 as api
-from fairtest.bugreport.helpers import prepare
+from ..bugreport import api2 as api
+from ..bugreport.helpers import prepare
 
 
 

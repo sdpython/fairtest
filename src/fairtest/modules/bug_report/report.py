@@ -1,7 +1,7 @@
 """
 Report association bugs
 """
-from StringIO import StringIO
+from io import StringIO
 import csv
 import _csv
 import datetime
@@ -18,11 +18,12 @@ import os
 import errno
 import re
 import pickle
-from fairtest.modules.metrics import Metric
-from fairtest.modules.context_discovery.tree_parser import Bound
-import fairtest.modules.bug_report.filter_rank as filter_rank
-
+import warnings
 import sys
+from ..metrics import Metric
+from ..context_discovery.tree_parser import Bound
+from ..bug_report import filter_rank
+
 
 class Namer(object):
     """
@@ -136,10 +137,10 @@ def print_summary(all_contexts, displayed_contexts, namer, output_stream):
     output_stream :
         stream to output the data to
     """
-    print >> output_stream, "Hierarchical printing of subpopulations (summary)"
-    print >> output_stream
-    print >> output_stream, "="*80
-    print >> output_stream
+    output_stream.write("Hierarchical printing of subpopulations (summary)")
+    output_stream.write('')
+    output_stream.write("="*80)
+    output_stream.write('')
 
     root = [c for c in all_contexts if c.isroot][0]
 
@@ -164,16 +165,16 @@ def print_summary(all_contexts, displayed_contexts, namer, output_stream):
                 else:
                     (ci_low, ci_high, _) = node.metric.stats
 
-                print >> output_stream, \
+                output_stream.write(\
                     '{} Context = {} ; CI = [{:.4f}, {:.4f}] ; Size = {}'.\
                     format(' '*indent, print_context(node.path, namer),
-                           ci_low, ci_high, node.size)
+                           ci_low, ci_high, node.size))
                 context_list.append(print_context(node.path, namer))
             else:
-                print >> output_stream, \
+                output_stream.write(\
                     '{} Context = {} ; Avg Effect = {:.4f}'.\
                         format(' '*indent, print_context(node.path, namer),
-                               node.metric.abs_effect())
+                               node.metric.abs_effect()))
                 context_list.append(print_context(node.path, namer))
             indent += 2
         for child in node.children:
@@ -181,8 +182,8 @@ def print_summary(all_contexts, displayed_contexts, namer, output_stream):
 
     recurse(root, 0)
 
-    print >> output_stream, '-'*80
-    print >> output_stream
+    output_stream.write('-'*80)
+    output_stream.write('')
 
     return context_list
 
@@ -234,9 +235,8 @@ def bug_report(contexts, stats, sens, expl, output, output_stream,
     # print global stats (root of tree)
     (root, root_stats) = [(c, stat) for (c, stat) in contexts_stats
                           if c.isroot][0]
-    print >> output_stream, 'Global Population {} of size {}'.format(root.num,
-                                                                     root.size)
-    print >> output_stream
+    output_stream.write('Global Population {} of size {}'.format(root.num, root.size))
+    output_stream.write('')
 
     # print a contingency table, correlation analysis or regression summary
     if metric_type == Metric.DATATYPE_CT:
@@ -247,8 +247,8 @@ def bug_report(contexts, stats, sens, expl, output, output_stream,
                            output_stream, plot_dir)
     else:
         print_context_reg(root, root_stats, namer, output_stream)
-    print >> output_stream, '='*80
-    print >> output_stream
+    output_stream.write('='*80)
+    output_stream.write('')
 
     # filter and rank bugs
     ranked_bugs = filter_rank.filter_rank_bugs(contexts_stats,
@@ -258,11 +258,9 @@ def bug_report(contexts, stats, sens, expl, output, output_stream,
     # print contexts in order of relevance
     for (context, context_stats) in ranked_bugs:
 
-        print >> output_stream, \
-            'Sub-Population {} of size {}'.format(context.num, context.size)
-        print >> output_stream, \
-            'Context = {}'.format(print_context(context.path, namer))
-        print >> output_stream
+        output_stream.write('Sub-Population {} of size {}'.format(context.num, context.size))
+        output_stream.write('Context = {}'.format(print_context(context.path, namer)))
+        output_stream.write('')
 
         if metric_type == Metric.DATATYPE_CT:
             print_context_ct(context, context_stats,
@@ -273,8 +271,8 @@ def bug_report(contexts, stats, sens, expl, output, output_stream,
                                plot_dir)
         else:
             print_context_reg(context, context_stats, namer, output_stream)
-        print >> output_stream, '-'*80
-        print >> output_stream
+        output_stream.write('-'*80)
+        output_stream.write('')
 
     # get the list of bugs that are displayed
     displayed_bugs = [root.num] + [x[0].num for x in ranked_bugs]
@@ -334,36 +332,35 @@ def print_context_ct(context, context_stats, metric_name, namer, output_stream):
         ct.index.name = out
         ct.columns = namer.get_sens_feature_vals(len(ct.columns))
         ct.columns.name = namer.sens
-        print >> output_stream, pretty_ct(ct)
-        print >> output_stream
+        output_stream.write(pretty_ct(ct))
+        output_stream.write('')
     else:
         expl_values = namer.get_expl_feature_vals(len(context_stats))
         for i in range(len(context.data)):
             if context.data[i].sum() > 0:
                 size = context.data[i].sum()
                 weight = (100.0*size)/context.size
-                print >> output_stream, '> {} = {} ; size {} ({:.2f}%):'.\
-                    format(namer.expl, expl_values[i], size, weight)
+                output_stream.write('> {} = {} ; size {} ({:.2f}%):'.\
+                    format(namer.expl, expl_values[i], size, weight))
 
                 (effect_low, effect_high, p_val) = context_stats.loc[i+1]
-                print >> output_stream, \
-                    'p-value = {:.2e} ; {} = [{:.4f}, {:.4f}]'.\
-                    format(p_val, 'DIFF', effect_low, effect_high)
+                output_stream.write('p-value = {:.2e} ; {} = [{:.4f}, {:.4f}]'.\
+                    format(p_val, 'DIFF', effect_low, effect_high))
 
                 ct = pd.DataFrame(context.data[i])
                 ct.index = namer.get_target_vals(out, len(ct.index))
                 ct.index.name = out
                 ct.columns = namer.get_sens_feature_vals(len(ct.columns))
                 ct.columns.name = namer.sens
-                print >> output_stream, pretty_ct(ct)
-                print >> output_stream
+                output_stream.write(pretty_ct(ct))
+                output_stream.write('')
 
         context_stats = context_stats.loc[0]
 
     # print p-value and confidence interval of MI
     (effect_low, effect_high, p_val) = context_stats
-    print >> output_stream, 'p-value = {:.2e} ; {} = [{:.4f}, {:.4f}]'.\
-        format(p_val, metric_name, effect_low, effect_high)
+    output_stream.write('p-value = {:.2e} ; {} = [{:.4f}, {:.4f}]'.\
+        format(p_val, metric_name, effect_low, effect_high))
 
 
 def rand_jitter(data):
@@ -526,8 +523,8 @@ def print_context_corr(context, context_stats, metric_name, namer,
             if len(context.data[i]) > 0:
                 size = len(context.data[i])
                 weight = (100.0*size)/context.size
-                print >> output_stream, '> {} = {} ; size {} ({:.2f}%):'.\
-                    format(namer.expl, expl_values[i], size, weight)
+                output_stream.write('> {} = {} ; size {} ({:.2f}%):'.\
+                    format(namer.expl, expl_values[i], size, weight))
 
                 data = context.data[i]
                 out = data[data.columns[0]]
@@ -565,17 +562,17 @@ def print_context_corr(context, context_stats, metric_name, namer,
                 plt.show()
 
             (effect_low, effect_high, p_val) = context_stats[i+1]
-            print >> output_stream, \
+            output_stream.write(\
                 'p-value = {:.2e} ; {} = [{:.4f}, {:.4f}]'.\
-                format(p_val, 'CORR', effect_low, effect_high)
-            print >> output_stream
+                format(p_val, 'CORR', effect_low, effect_high))
+            output_stream.write('')
 
         context_stats = context_stats[0]
 
     # print p-value and confidence interval of correlation
     (effect_low, effect_high, p_val) = context_stats
-    print >> output_stream, 'p-value = {:.2e} ; {} = [{:.4f}, {:.4f}]'.\
-        format(p_val, metric_name, effect_low, effect_high)
+    output_stream.write('p-value = {:.2e} ; {} = [{:.4f}, {:.4f}]'.\
+        format(p_val, metric_name, effect_low, effect_high))
 
 
 def print_context_reg(context, context_stats, namer, output_stream):
@@ -598,9 +595,9 @@ def print_context_reg(context, context_stats, namer, output_stream):
     """
     effect = context.metric.abs_effect()
 
-    print >> output_stream, \
-        'Average Effect of top-{} labels: {}'.format(len(context_stats), effect)
-    print >> output_stream
+    output_stream.write(\
+        'Average Effect of top-{} labels: {}'.format(len(context_stats), effect))
+    output_stream.write('')
     labels = namer.output.names
 
     stats = context_stats.copy()
@@ -611,8 +608,8 @@ def print_context_reg(context, context_stats, namer, output_stream):
     sorted_results = stats.sort(columns=['pval'], ascending=True)
 
     pd.set_option('display.max_rows', context.metric.topk)
-    print >> output_stream, sorted_results
-    print >> output_stream
+    output_stream.write(sorted_results)
+    output_stream.write('')
 
     context_data = context.additional_data['data_node']
     sens = namer.sens
@@ -629,8 +626,8 @@ def print_context_reg(context, context_stats, namer, output_stream):
         ct.columns = namer.get_sens_feature_vals(2)
         ct.columns.name = sens
 
-        print >> output_stream, pretty_ct(ct)
-        print >> output_stream
+        output_stream.write(pretty_ct(ct))
+        output_stream.write('')
 
 
 def pretty_ct(ct):
@@ -658,8 +655,7 @@ def pretty_ct(ct):
         return pretty_table
     except _csv.Error:
         exc_info = sys.exc_info()
-        print >> sys.stderr, "[Warning] pretty_table raised an exception :", \
-                             exc_info[1]
+        warnings.warn("[Warning] pretty_table raised an exception : {0}".format(exc_info[1]))
         if exc_info[1].message == "Could not determine delimiter":
             pt = None
             output.seek(0)
@@ -668,7 +664,7 @@ def pretty_ct(ct):
             for row in rd:
                 pt.add_row(row)
         else:
-            raise exc_info[0], exc_info[1], exc_info[2]
+            raise Exception((exc_info[0], exc_info[1], exc_info[2]))
 
 
 def rich_ct(contingency_table):
@@ -760,29 +756,23 @@ def print_report_info(dataset, train_size, test_size, sensitive, contextual,
     output_stream :
         stream to output the data to
     """
-    print >> output_stream, '='*80
-#    if os.path.exists('../.git'):
-#        print >> output_stream, 'Commit Hash: \t{}'.\
-#            format(subprocess.check_output(['git', 'rev-parse', 'HEAD'],
-#                                           cwd='..').strip())
-#    else:
-#        print >> output_stream, 'Commit Hash: Not A Git Repository'
-    print >> output_stream, 'Report Creation time:',\
-        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print >> output_stream
-    print >> output_stream, 'Dataset: {}'.format(dataset)
-    print >> output_stream, 'Train Size: {}'.format(train_size)
-    print >> output_stream, 'Test Size: {}'.format(test_size)
-    print >> output_stream, 'S: {}'.format(sensitive)
-    print >> output_stream, 'X: {}'.format("\n\t".join(
-        textwrap.wrap(str(contextual), 60)))
-    print >> output_stream, 'E: {}'.format(expl)
+    output_stream.write('='*80)
+    output_stream.write('Report Creation time:',\
+        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    output_stream.write('')
+    output_stream.write('Dataset: {}'.format(dataset))
+    output_stream.write('Train Size: {}'.format(train_size))
+    output_stream.write('Test Size: {}'.format(test_size))
+    output_stream.write('S: {}'.format(sensitive))
+    output_stream.write('X: {}'.format("\n\t".join(
+        textwrap.wrap(str(contextual), 60))))
+    output_stream.write('E: {}'.format(expl))
     if len(target) > 10:
         target = '[{} ... {}]'.format(target[0], target[-1])
-    print >> output_stream, 'O: {}'.format(target)
-    print >> output_stream
-    print >> output_stream, 'Train Params: \t{}'.format(train_params)
-    print >> output_stream, 'Test Params: \t{}'.format(test_params)
-    print >> output_stream, 'Report Params: \t{}'.format(display_params)
-    print >> output_stream, '='*80
-    print >> output_stream
+    output_stream.write('O: {}'.format(target))
+    output_stream.write('')
+    output_stream.write('Train Params: \t{}'.format(train_params))
+    output_stream.write('Test Params: \t{}'.format(test_params))
+    output_stream.write('Report Params: \t{}'.format(display_params))
+    output_stream.write('='*80)
+    output_stream.write('')

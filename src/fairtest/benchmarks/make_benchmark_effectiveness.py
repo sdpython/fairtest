@@ -11,9 +11,8 @@ The logic for now is:
                       and (50-DIFF)% of he poor to get discounts
                     - run FairTest and report the number of contexts found
 """
-import fairtest.utils.prepare_data as prepare
-from fairtest import Testing, train, test, report, DataSource
-
+from .utils import prepare_data as prepare
+from . import Testing, train, test, report, DataSource
 from copy import deepcopy
 from random import shuffle, randint, seed
 
@@ -207,7 +206,7 @@ def do_benchmark((classes, pool, guard_lines)):
             random_suffix = str(randint(1, 999999))
             current_filename = BASE_FILENAME + random_suffix
             f_temp = open(current_filename, "w+")
-            print >> f_temp, "state,gender,race,income,price"
+            f_temp.write("state,gender,race,income,price")
 
             lines = 0
             for state_race in _selected:
@@ -229,8 +228,8 @@ def do_benchmark((classes, pool, guard_lines)):
                     else:
                         price = "low" if poor_price_pool.pop() else "high"
 
-                    print >> f_temp, "%s,%s,%s,%s,%s" % (state, gender, race,
-                                                         income, price)
+                    f_temp.write("%s,%s,%s,%s,%s" % (state, gender, race,
+                                                         income, price))
                     lines += 1
                 del _pool[state_race]
 
@@ -243,11 +242,11 @@ def do_benchmark((classes, pool, guard_lines)):
 
                 for entry in _pool[state_race]:
                     price = "low" if price_pool.pop() else "high"
-                    print >> f_temp, "%s,%s,%s,%s,%s" % (entry.split(",")[0],
+                    f_temp.write("%s,%s,%s,%s,%s" % (entry.split(",")[0],
                                                          entry.split(",")[1],
                                                          entry.split(",")[2],
                                                          entry.split(",")[3],
-                                                         price)
+                                                         price))
                     lines += 1
 
             f_temp.close()

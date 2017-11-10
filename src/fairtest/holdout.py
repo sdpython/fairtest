@@ -35,11 +35,12 @@ class Holdout(object):
         self.test_set_conf = conf ** (1.0 / budget)
 
         # split the test set into multiple independent holdout sets
-        test_set_size = len(data)/budget
+        test_set_size = len(data) // budget
         self._test_sets = []
+        
         for i in range(budget):
-            self._test_sets.append(
-                data.iloc[i * test_set_size:(i + 1) * test_set_size]
+            self._test_sets.append(            
+                data.iloc[i * test_set_size:(i + 1) * test_set_size, :]
             )
 
         logging.info('Testing Sizes %s' % [len(x) for x in self._test_sets])

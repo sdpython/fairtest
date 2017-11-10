@@ -1,11 +1,10 @@
 """
 Guided Tree Construction Algorithm.
 """
-from fairtest.modules.metrics import Metric
+from ..metrics import Metric
 import operator
 import numpy as np
 from collections import Counter
-from ete2 import Tree
 from sklearn.externals import six
 from sklearn.externals.six import StringIO
 from copy import copy
@@ -158,6 +157,7 @@ def build_tree(data, feature_info, sens, expl, output, metric, conf,
     tree :
         the tree built by the algorithm
     """
+    from ete3 import Tree    
     logging.info('Building a Guided Decision Tree')
     tree = Tree()
 

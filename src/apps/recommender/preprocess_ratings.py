@@ -38,6 +38,6 @@ if __name__ == "__main__":
                     numbers = range(user_count)
                     shuffle(numbers)
                 
-                print >> outf, '::'.join(r[0:-1]+[str(numbers.pop(0))])
+                outf.write('::'.join(r[0:-1]+[str(numbers.pop(0))]))
     
-    print 'minimum number of ratings = {}'.format(min_num+1)
+    print('minimum number of ratings = {}'.format(min_num+1))

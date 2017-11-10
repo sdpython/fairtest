@@ -4,9 +4,9 @@ Run FairTest Testing Investigation on Staples Dataset
 Usage: ./make_staples.py fairtest/data/staples/staples.csv results/staples
 """
 
-import fairtest.utils.prepare_data as prepare
-from fairtest import Testing, train, test, report, DataSource
-from fairtest.utils import log
+from .utils import prepare_data as prepare
+from . import Testing, train, test, report, DataSource
+from .utils import log
 import logging
 
 from time import time

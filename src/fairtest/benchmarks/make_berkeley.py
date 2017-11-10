@@ -4,8 +4,8 @@ Run FairTest Testing Investigation on Berkeley Dataset
 Usage: ./make_berkeley.py fairtest/data/berkeley/berkeley.csv results/berkeley
 """
 
-import fairtest.utils.prepare_data as prepare
-from fairtest import Testing, train, test, report, DataSource
+from .utils import prepare_data as prepare
+from . import Testing, train, test, report, DataSource
 
 from time import time
 import sys

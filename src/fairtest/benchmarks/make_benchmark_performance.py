@@ -16,8 +16,8 @@ Logic for now is:
              - Report train_time and test_time
 """
 
-import fairtest.utils.prepare_data as prepare
-from fairtest import Testing, train, test, report, DataSource
+from .utils import prepare_data as prepare
+from . import Testing, train, test, report, DataSource
 
 from time import time
 from copy import deepcopy
@@ -147,9 +147,9 @@ def do_benchmark((contents, feature_range, size_range)):
     current_filename = BASE_FILENAME + random_suffix
     f_temp = open(current_filename, "w+")
 
-    print >> f_temp, features_header
+    f_temp.write(features_header)
     for content in magnify_contents(_contents, features):
-        print >> f_temp, ','.join(content)
+        f_temp.write(','.join(content))
 
     f_temp.close()
 

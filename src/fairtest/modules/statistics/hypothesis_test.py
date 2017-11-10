@@ -6,7 +6,6 @@ import pandas as pd
 import scipy.stats as stats
 import numpy as np
 import sklearn.metrics as metrics
-import rpy2.robjects as ro
 from collections import Counter
 
 
@@ -162,9 +161,10 @@ def permutation_test_ct(data, num_samples=100000):
     if data.shape[0] < 2 or data.shape[1] < 2:
         return 1
 
-    ro.globalenv['ct'] = data
-    pval = ro.r('chisq.test(ct, simulate.p.value = TRUE, B = {})$p.value'.
-                format(num_samples))[0]
+    raise NotImplementedError("Replaces with Python")
+    # ro.globalenv['ct'] = data
+    # pval = ro.r('chisq.test(ct, simulate.p.value = TRUE, B = {})$p.value'.
+    #             format(num_samples))[0]
     return max(pval, 1.0/num_samples)
 
 

@@ -1,6 +1,6 @@
 import unittest
-import fairtest.utils.prepare_data as prepare
-from fairtest import Testing, DataSource
+from .utils import prepare_data as prepare
+from . import Testing, DataSource
 
 
 class TestingTestCase(unittest.TestCase):
