@@ -323,12 +323,15 @@ def build_tree(data, feature_info, sens, expl, output, metric, conf,
     if len(features) < 10:
         pool_size = 1
     else:
-        pool_size = 1#max(1, multiprocessing.cpu_count() - 2)
+        pool_size = 1 # max(1, multiprocessing.cpu_count() - 2)
 
-    pool = multiprocessing.Pool(pool_size)
-    rec_build_tree(data, tree, [], features, 0, 0, pool)
-    pool.close()
-    pool.join()
+    if pool_size == 1:
+        rec_build_tree(data, tree, [], features, 0, 0, None)
+    else:
+        pool = multiprocessing.Pool(pool_size)
+        rec_build_tree(data, tree, [], features, 0, 0, pool)
+        pool.close()
+        pool.join()
 
     return tree
 
@@ -465,7 +468,10 @@ def select_best_feature(node_data, features, split_params,
     )
 
     # parallelize scoring of features
-    results = pool.map_async(score_feature, args).get()
+    if pool is None:
+        results = list(map(score_feature, args))
+    else:
+        results = pool.map_async(score_feature, args).get()
 
     # drop features with no split
     to_drop = [d['feature'] for d in results if d['split_score'] is None]
