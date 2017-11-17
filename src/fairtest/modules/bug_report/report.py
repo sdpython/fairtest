@@ -5,7 +5,7 @@ from io import StringIO
 import csv
 import _csv
 import datetime
-import prettytable
+from PTable import prettytable
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from matplotlib import rcParams
